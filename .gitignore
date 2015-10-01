@@ -4,6 +4,9 @@
 ##  If you find other files not necessary to be tracked by git, please edit. ##
 ###############################################################################
 
+#IntelliJ Idea:
+.idea/
+
 # Directories #
 /build/
 /bin/
