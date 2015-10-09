@@ -3,7 +3,6 @@
 ##    http://www.bmchild.com/2012/06/git-ignore-for-java-eclipse-project.html##
 ##  If you find other files not necessary to be tracked by git, please edit. ##
 ###############################################################################
-*.iml
 
 # Directories #
 /build/
