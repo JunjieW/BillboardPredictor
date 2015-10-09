@@ -4,6 +4,14 @@
 ##  If you find other files not necessary to be tracked by git, please edit. ##
 ###############################################################################
 
+# IntelliJ IDEA #
+# Reference: http://stackoverflow.com/a/29998583 #
+*.iml
+
+# IntelliJ IDEA Directory-based project format: #
+# Reference: http://stackoverflow.com/a/29998583 #
+**/.idea
+
 # Directories #
 /build/
 /bin/
