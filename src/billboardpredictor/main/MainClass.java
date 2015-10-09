@@ -1,8 +1,8 @@
 package billboardpredictor.main;
 
-public class main {
+public class MainClass {
 
-	public main() {
+	public static void main(String[] args) {
 		// TODO Auto-generated constructor stub
 	}
 
