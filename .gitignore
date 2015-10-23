@@ -6,7 +6,7 @@
 
 # IntelliJ IDEA #
 # Reference: http://stackoverflow.com/a/29998583 #
-*.iml
+# *.iml
 
 # IntelliJ IDEA Directory-based project format: #
 # Reference: http://stackoverflow.com/a/29998583 #
