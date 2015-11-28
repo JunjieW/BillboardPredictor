@@ -93,7 +93,8 @@ class BoardTableParser(HTMLParser.HTMLParser):
             self.in_tr = False
         if tag ==  'html':
             self.outfile.write('# Week ' + self.str_outfile_path_indicated_by_date + '\n')
-            self.outfile.write("This Week Pos, Last Week Pos, This Week Peak, This Week Total Week, Title, Artist, Entry Date, Entry Pos, Peak Pos, Total Weeks\n")
+            if not self.is_only_get_title:
+                self.outfile.write("This Week Pos, Last Week Pos, This Week Peak, This Week Total Week, Title, Artist, Entry Date, Entry Pos, Peak Pos, Total Weeks\n")
             self.outfile.write(self.out_buffer)
 
     def putIntoBuffer(self, str_data):
