@@ -23,13 +23,17 @@ public class TwitterCall {
     StatusListener listener = new StatusListener() {
         @Override
         public void onStatus(Status status) {
+            String myOut = "";
             // this is where we print it out
             System.out.println("@" + status.getUser().getScreenName() + " - " + status.getText());
             // let's try to write it into text file
             try {
-                BufferedWriter output = new BufferedWriter(new FileWriter(file));
-                output.write(status.getUser().getName() + ":" + status.getText());
-                output.flush();
+                // FileWriter(file, true) will create the file if not exists
+                BufferedWriter output = new BufferedWriter(new FileWriter(file, true));
+                myOut = status.getUser().getName() + ":" + status.getText() + "\n";
+                // Difference between BufferedWriter.write() and .flush() ~ http://stackoverflow.com/a/15042890 and http://stackoverflow.com/a/908203
+                output.write(myOut); // write to buffer
+                output.flush(); // flush: write from buffer to file
             }catch (Exception e) {
                 e.printStackTrace();
             }
@@ -114,7 +118,7 @@ public class TwitterCall {
         // ==== End From Junjie ====
         twitterStream.filter(new FilterQuery(0, followArray, trackArray));
     }
-
+    
     public void testStreamByOurToken(){
 
         try {
@@ -151,6 +155,10 @@ public class TwitterCall {
             followArray[i] = follow.get(i);
         }
         String[] trackArray = track.toArray(new String[track.size()]);
+        // Try here to set stream obj with language filter
+//        FilterQuery fq = new FilterQuery(0, followArray, trackArray);
+//        fq.language("en-US");
+//        theTwitterStream.filter(fq);
         theTwitterStream.filter(new FilterQuery(0, followArray, trackArray));
 
     }
@@ -161,45 +169,25 @@ public class TwitterCall {
         System.out.print("token_type: " + token.getTokenType() + "\n access_token: " + token.getAccessToken() );
     }
 
-    public void anotherTest() throws TwitterException {
-//        if (args.length < 1) {
-//            System.out.println("java twitter4j.examples.search.SearchTweets [query]");
-//            System.exit(-1);
-//        }
-//
-//        Twitter twitter = new TwitterFactory().getInstance();
-//        twitter.getOAuth2Token();
-//
-//        try {
-//            Query query = new Query();
-//            QueryResult result;
-//            do {
-//                result = twitter.search(query);
-//                List<Status> tweets = result.getTweets();
-//                for (Status tweet : tweets) {
-//                    System.out.println("@" + tweet.getUser().getScreenName() + " - " + tweet.getText());
-//                }
-//            } while ((query = result.nextQuery()) != null);
-//            System.exit(0);
-//        } catch (TwitterException te) {
-//            te.printStackTrace();
-//            System.out.println("Failed to search tweets: " + te.getMessage());
-//            System.exit(-1);
-//        }
+    public void getRateLimit(String endpoint){
+        String family = endpoint.split("/", 3)[1];
+        Twitter twitter = new TwitterFactory(cb.build()).getInstance();
+        try {
+            RateLimitStatus status = twitter.getRateLimitStatus("users").get(endpoint);
+        } catch (TwitterException e) {
+            e.printStackTrace();
+        }
     }
 
 
     public static void main(String[] args) throws TwitterException {
 
         TwitterCall tc = new TwitterCall();
-
         int testFuncNum = 1;
         if (testFuncNum == 0){
             tc.testSampleCode();
-        }else if (testFuncNum == 1){
+        }else if (testFuncNum == 1) {
             tc.testStreamByOurToken();
-        }else if (testFuncNum == 2){
-            tc.testAuth();
         }
     }
 
