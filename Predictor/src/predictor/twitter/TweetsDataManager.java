@@ -1,10 +1,14 @@
 package predictor.twitter;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Vector;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -22,15 +26,15 @@ import java.util.regex.Pattern;
 public class TweetsDataManager {
 
     private boolean DEBUG = true;
-    protected String datasetPath = "C:\\Users\\DC-IT-Dev\\Desktop\\NYU2015FALL-Course-Material\\PA\\Final Project\\Data-stanford\\tweets2009-06-data\\tweets2009-06.txt";
-    protected String keywordsPath = "./UmdScraper/20090530"; // Song titles
+    protected String datasetPath = "./tweets2009-06.txt";
+    protected String keywordsPath = "./UmdScraper/20090627"; // Song titles
 
-    protected LineNumberReader bfrDataset = null;
+    private LineNumberReader bfrDataset = null;
 
-    ArrayList<String> keywords = new ArrayList<String>();
+    Vector<String> keywords = new Vector<String>();
 
     ArrayList<Integer> splitPosition = new ArrayList<Integer>();
-    ArrayList<String> dateOfSaturdaysInMonth = new ArrayList<String>();
+    ArrayList<String> dateOfSundaysInMonth = new ArrayList<String>();
     private int baseYear;
     private int baseMonth;
 
@@ -43,28 +47,94 @@ public class TweetsDataManager {
         try {
             bfrDataset = new LineNumberReader(new FileReader(datasetPath));
             String line;
-            for (String str_dateOfSat : dateOfSaturdaysInMonth) {
+            for (String str_dateOfSat : dateOfSundaysInMonth) {
                 do {
                     line = bfrDataset.readLine();
-                    // http://stackoverflow.com/a/86832
-                    if ( Pattern.compile(Pattern.quote(str_dateOfSat), Pattern.CASE_INSENSITIVE).matcher(line).find() ) {
-                        int pos = bfrDataset.getLineNumber();
-                        if (DEBUG) System.out.println(pos);
-                        splitPosition.add(pos);
-                        break;
+                    if (line.length() > 0 && line.charAt(0) == 'T') {
+                        // http://stackoverflow.com/a/86832
+                        Matcher matcher = Pattern.compile(Pattern.quote(str_dateOfSat), Pattern.CASE_INSENSITIVE).matcher(line);
+                        if ( matcher.find() ) {
+                            int pos = bfrDataset.getLineNumber();
+                            if (DEBUG) System.out.println(pos + ":" + line);
+                            splitPosition.add(pos);
+
+                            break;
+                        }
                     }
                 } while ( line != null);
             }
+
+            while ( bfrDataset.readLine() != null){
+                // Do nothing, just go to the end of the file and get the line count
+            }
+            System.out.println("last line is line: " + bfrDataset.getLineNumber() + "+1\n");
+            splitPosition.add(bfrDataset.getLineNumber());
+
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     public void splitWeeklyData() {
-        getDateOfSaturdaysInMonth(baseYear, baseMonth);
+        getDateOfSundaysInMonth(baseYear, baseMonth);
         getSplitPositions();
         //readKeywords();
+        try {
+            //bfrDataset = new LineNumberReader(new FileReader(datasetPath));
+            bfrDataset = new LineNumberReader(new InputStreamReader(new FileInputStream(datasetPath), "UTF8"));
+            BufferedWriter bfrWriter;
+            String file_name;
+            for (int i = 0; i < splitPosition.size(); ++i) {
+                if (i == splitPosition.size() - 1) {
+                    file_name = dateOfSundaysInMonth.get(0).substring(0,dateOfSundaysInMonth.get(0).length() - 3 ) + "-end";
+                } else {
+                    file_name = dateOfSundaysInMonth.get(i);
+                }
+                String line;
+
+                //bfrWriter = new BufferedWriter(new FileWriter(file_name, false));
+                bfrWriter = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(file_name,false), "UTF8"));
+                while ( bfrDataset.getLineNumber() < splitPosition.get(i)) {
+                    line = bfrDataset.readLine();
+                    if (line.length() > 0) {
+                        // skip the tag at the beginning of each line, and trim the blank space on both sides
+                        if (line.charAt(0) == 'W') {
+                            bfrWriter.append(line.substring(1).trim() + "\n");
+                        }
+                    }
+                }
+                bfrWriter.flush();
+                bfrWriter.close();
+                if (DEBUG) System.out.print("====== " + file_name +" Done ======\n");
+            }
+            bfrDataset.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected void getDateOfSundaysInMonth(int year, int month) {
+        // http://stackoverflow.com/a/9909488  && http://www.mkyong.com/java/java-date-and-calendar-examples/
+        Calendar calendar = Calendar.getInstance();
+        // calendarl.set() is month-zero base, i.e. January = 0;
+        calendar.set(year, month - 1, 1);
+        int daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        for (int day = 1; day <= daysInMonth; day++) {
+            calendar.set(year, month - 1, day);
+            int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+            Date date = calendar.getTime();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String str_date = dateFormat.format(date);
+
+            if (dayOfWeek == Calendar.SUNDAY) {
+                dateOfSundaysInMonth.add(str_date);
+                System.out.println(str_date);
+            }
+        }
     }
 
     protected void readKeywords() {
@@ -87,29 +157,50 @@ public class TweetsDataManager {
         }
     }
 
-    protected void getDateOfSaturdaysInMonth(int year, int month) {
-        // http://stackoverflow.com/a/9909488  && http://www.mkyong.com/java/java-date-and-calendar-examples/
-        Calendar calendar = Calendar.getInstance();
-        // calendarl.set() is month-zero base, January = 0;
-        calendar.set(year, month - 1, 1);
-        int daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-        for (int day = 1; day <= daysInMonth; day++) {
-            calendar.set(year, month - 1, day);
-            int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-            Date date = calendar.getTime();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String str_date = dateFormat.format(date);
+    protected void searchMentionsInFile(String inputFileName) {
+        try {
+            LineNumberReader bufReader;
+            BufferedWriter bufWriter;
+            String str_output_path = "./" + inputFileName + "-result";
+            File output_folder = new File(str_output_path);
+            if ( !output_folder.exists())
+                output_folder.mkdir();
+            //for (int i = 0; i < keywords.size(); ++i) {
+            for (int i = 0; i < keywords.size(); ++i) {
+                String str_out_file_name = str_output_path + "/" + (i+1) + "_" + keywords.elementAt(i).replace(" ","_").replace("?","").replace("!","");
+                bufReader = new LineNumberReader(new InputStreamReader(new FileInputStream(inputFileName), "UTF8"));
+                bufWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(str_out_file_name,false), "UTF8"));
 
-            if (dayOfWeek == Calendar.SATURDAY) {
-                dateOfSaturdaysInMonth.add(str_date);
-                System.out.println(str_date);
+                long mentionCount = 0;
+                String line = "";
+                while (line != null) {
+                    line = bufReader.readLine();
+                    if (line != null && line.contains(keywords.elementAt(i))) {
+                        bufWriter.append(line + "\n");
+                        mentionCount++;
+                    }
+                }
+                bufWriter.flush();
+                bufWriter.close();
+
+                bufReader.close();
+                if (DEBUG) System.out.println("\"" + (i+1) + " " + keywords.elementAt(i) + "\"" + "has " + mentionCount + " mentions" );
             }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     public static void main(String[] args) {
         TweetsDataManager tdm = new TweetsDataManager(2009, 6);
-        tdm.splitWeeklyData();
+        //tdm.splitWeeklyData();
+
+        System.out.println("====== Finish Splitting Dataset, Start to Read Keywords =======");
+        tdm.readKeywords();
+        System.out.println("====== Finish Reading Keywords, Start Searching =======");
+        tdm.searchMentionsInFile("2009-06-28");
     }
 
 

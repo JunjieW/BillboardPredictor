@@ -145,7 +145,7 @@ def getBillboardData(str_start, num_weeks):
         my_datetime += timedelta(days=7)
 
 
-getBillboardData('20090530', 5)
+getBillboardData('20090606', 5)
 
 
 # # TODO: wirte data into text file rather than in console
