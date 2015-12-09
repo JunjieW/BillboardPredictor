@@ -26,8 +26,8 @@ import java.util.regex.Pattern;
 public class TweetsDataManager {
 
     private boolean DEBUG = true;
-    protected String datasetPath = "./tweets2009-06.txt";
-    protected String keywordsPath = "./UmdScraper/20090627"; // Song titles
+    protected String datasetPath = "";
+    //protected String keywordsPath = "./UmdScraper/20090627"; // Song titles
 
     private LineNumberReader bfrDataset = null;
 
@@ -41,6 +41,27 @@ public class TweetsDataManager {
     public TweetsDataManager(int year, int month) {
         baseYear = year;
         baseMonth = month;
+    }
+
+    //============================== For Dataset Spliting ===================================
+    protected void getDateOfSundaysInMonth(int year, int month) {
+        // http://stackoverflow.com/a/9909488  && http://www.mkyong.com/java/java-date-and-calendar-examples/
+        Calendar calendar = Calendar.getInstance();
+        // calendarl.set() is month-zero base, i.e. January = 0;
+        calendar.set(year, month - 1, 1);
+        int daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        for (int day = 1; day <= daysInMonth; day++) {
+            calendar.set(year, month - 1, day);
+            int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+            Date date = calendar.getTime();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String str_date = dateFormat.format(date);
+
+            if (dayOfWeek == Calendar.SUNDAY) {
+                dateOfSundaysInMonth.add(str_date);
+                System.out.println(str_date);
+            }
+        }
     }
 
     public void getSplitPositions() {
@@ -78,13 +99,14 @@ public class TweetsDataManager {
         }
     }
 
-    public void splitWeeklyData() {
+    public void splitWeeklyData(String str_pathToMonthlyData) {
+        this.datasetPath = str_pathToMonthlyData;
         getDateOfSundaysInMonth(baseYear, baseMonth);
         getSplitPositions();
         //readKeywords();
         try {
             //bfrDataset = new LineNumberReader(new FileReader(datasetPath));
-            bfrDataset = new LineNumberReader(new InputStreamReader(new FileInputStream(datasetPath), "UTF8"));
+            bfrDataset = new LineNumberReader(new InputStreamReader(new FileInputStream(this.datasetPath), "UTF8"));
             BufferedWriter bfrWriter;
             String file_name;
             for (int i = 0; i < splitPosition.size(); ++i) {
@@ -117,29 +139,14 @@ public class TweetsDataManager {
         }
     }
 
-    protected void getDateOfSundaysInMonth(int year, int month) {
-        // http://stackoverflow.com/a/9909488  && http://www.mkyong.com/java/java-date-and-calendar-examples/
-        Calendar calendar = Calendar.getInstance();
-        // calendarl.set() is month-zero base, i.e. January = 0;
-        calendar.set(year, month - 1, 1);
-        int daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-        for (int day = 1; day <= daysInMonth; day++) {
-            calendar.set(year, month - 1, day);
-            int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-            Date date = calendar.getTime();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String str_date = dateFormat.format(date);
+    //============================== End of Dataset Spliting ===================================
 
-            if (dayOfWeek == Calendar.SUNDAY) {
-                dateOfSundaysInMonth.add(str_date);
-                System.out.println(str_date);
-            }
-        }
-    }
+    //============================== For Keywords Searching ===================================
+    protected void readKeywords(String str_pathToWeeklyKeywords) {
 
-    protected void readKeywords() {
         try {
-            BufferedReader bfrKeywordsFile = new BufferedReader(new FileReader(keywordsPath));
+            //BufferedReader bfrKeywordsFile = new BufferedReader(new FileReader(this.keywordsPath));
+            BufferedReader bfrKeywordsFile = new BufferedReader(new FileReader(str_pathToWeeklyKeywords));
             String line;
             int numOfKeywords = 0;
             do{
@@ -184,7 +191,7 @@ public class TweetsDataManager {
                 bufWriter.close();
 
                 bufReader.close();
-                if (DEBUG) System.out.println("\"" + (i+1) + " " + keywords.elementAt(i) + "\"" + "has " + mentionCount + " mentions" );
+                if (DEBUG) System.out.println("\"" + (i+1) + " " + keywords.elementAt(i) + "\"" + " has " + mentionCount + " mentions" );
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -192,15 +199,19 @@ public class TweetsDataManager {
             e.printStackTrace();
         }
     }
+    //============================== End of Keywords Searching ===================================
 
     public static void main(String[] args) {
         TweetsDataManager tdm = new TweetsDataManager(2009, 6);
-        //tdm.splitWeeklyData();
+//        tdm.splitWeeklyData("./tweets2009-07.txt");
+//        System.out.println("====== Finish Splitting Dataset=======");
 
-        System.out.println("====== Finish Splitting Dataset, Start to Read Keywords =======");
-        tdm.readKeywords();
-        System.out.println("====== Finish Reading Keywords, Start Searching =======");
-        tdm.searchMentionsInFile("2009-06-28");
+        System.out.println("====== Start to Read Keywords =======");
+        tdm.readKeywords("./UmdScraper/20090704");
+        System.out.println("====== Finish Reading Keywords =======");
+        tdm.searchMentionsInFile("2009-06-end");
+        System.out.println("====== Finish Start Searching =======");
+
     }
 
 

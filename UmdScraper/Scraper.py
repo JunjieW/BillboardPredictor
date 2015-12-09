@@ -13,21 +13,6 @@ from datetime import timedelta
 ## according to billboard, the date of a chart is the last day of the chart.
 ## So if we search for 2009 06 06, it means the char is for 2009 05 31 - 2009 06 06
 
-# str_url_prefix = 'http://www.umdmusic.com/default.asp?Lang=English&Chart=D&ChDate='
-# str_init_date = '20090530'
-# number_of_weeks = 20
-# str_url = str_url_prefix + str_init_date
-# print str_url + '\n'
-
-# my_datetime = datetime.strptime(str_init_date, "%Y%m%d")
-# print 'Confirm Intialization: ', my_datetime.strftime("%Y%m%d") + '\n'
-
-# print '==== Start ====='
-# my_datetime = datetime.strptime(str_init_date, "%Y%m%d")
-# for i in range(1,number_of_weeks+1):
-#     print my_datetime.strftime("%Y%m%d")
-#     my_datetime += timedelta(days=7)
-
 class BoardTableParser(HTMLParser.HTMLParser):
     def __init__(self, str_outfile, bool_only_get_title):
         HTMLParser.HTMLParser.__init__(self)
@@ -126,26 +111,25 @@ def gethtml(str_url):
     return f_html
 
 
-def getBillboardData(str_start, num_weeks):
+def getBillboardData(str_start, num_weeks, onlyTitle):
     # Initial url, intitial data, and iterations setting
     str_url_prefix = 'http://www.umdmusic.com/default.asp?Lang=English&Chart=D&ChDate='
     str_init_date = str_start
     number_of_weeks = num_weeks
     my_datetime = datetime.strptime(str_init_date, "%Y%m%d")
 
-    only_get_song_title = True
+    #only_get_song_title = onlyTitle
 
     # Start iteration
     for i in range(1,number_of_weeks+1):
         str_url = str_url_prefix + my_datetime.strftime("%Y%m%d")
         print my_datetime.strftime("%Y%m%d")
         print str_url
-        bbt_parser = BoardTableParser(str(my_datetime.strftime("%Y%m%d")), only_get_song_title)
+        bbt_parser = BoardTableParser(str(my_datetime.strftime("%Y%m%d")), onlyTitle)
         bbt_parser.feed(gethtml(str_url))
         my_datetime += timedelta(days=7)
 
 
-getBillboardData('20090606', 5)
-
+getBillboardData('20090606', 31, True)
 
 # # TODO: wirte data into text file rather than in console
