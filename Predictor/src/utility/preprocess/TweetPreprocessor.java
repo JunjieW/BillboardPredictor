@@ -1,6 +1,8 @@
 package utility.preprocess;
 
 import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by JunjieW on 2015/12/13.
@@ -44,9 +46,24 @@ public class TweetPreprocessor {
         }
     }
 
+    // http://stackoverflow.com/a/12950893
+    public static String removeUrl(String commentstr) {
+        String urlPattern = "((https?|ftp|gopher|telnet|file|Unsure|http):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
+        Pattern p = Pattern.compile(urlPattern,Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(commentstr);
+        int i = 0;
+        while (m.find()) {
+            commentstr = commentstr.replaceAll(m.group(i),"").trim();
+            i++;
+        }
+        return commentstr;
+    }
+
     public static void main(String[] args) {
         String previous = "./2009-06-end-07-05-result";
         String later = "./2009-07-05-result";
         TweetPreprocessor.combineDataCrossMonth(previous,later);
+
+
     }
 }
