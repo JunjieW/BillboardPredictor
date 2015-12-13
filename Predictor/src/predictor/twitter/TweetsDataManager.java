@@ -202,14 +202,14 @@ public class TweetsDataManager {
     //============================== End of Keywords Searching ===================================
 
     public static void main(String[] args) {
-        TweetsDataManager tdm = new TweetsDataManager(2009, 6);
-//        tdm.splitWeeklyData("./tweets2009-07.txt");
+        TweetsDataManager tdm = new TweetsDataManager(2009, 8);
+//        tdm.splitWeeklyData("./tweets2009-08.txt");
 //        System.out.println("====== Finish Splitting Dataset=======");
 
         System.out.println("====== Start to Read Keywords =======");
-        tdm.readKeywords("./UmdScraper/20090704");
+        tdm.readKeywords("./UmdScraper/20090815");
         System.out.println("====== Finish Reading Keywords =======");
-        tdm.searchMentionsInFile("2009-06-end");
+        tdm.searchMentionsInFile("2009-08-16");
         System.out.println("====== Finish Start Searching =======");
 
     }
