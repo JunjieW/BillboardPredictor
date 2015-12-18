@@ -13,7 +13,7 @@ from datetime import timedelta
 
 ## The 8-digits date argument in url means the week of a certain chart,
 ## according to billboard, the date of a chart is the last day of the chart.
-## So if we search for 2009 06 06, it means the char is for 2009 05 31 - 2009 06 06
+## So if we search for 2009 06 06, it means the chart is for 2009 05 31 - 2009 06 06
 
 class BoardTableParser(HTMLParser.HTMLParser):
     def __init__(self, str_outfile, bool_only_get_title):
