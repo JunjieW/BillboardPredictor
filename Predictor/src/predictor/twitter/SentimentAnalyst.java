@@ -113,13 +113,17 @@ public class SentimentAnalyst {
 
     // http://stackoverflow.com/a/26928471
     public static void main(String[] args) throws IOException {
+
+        // Uncomment batchEvaluation to analyze all the tweets files in "[project]/mentions/"
         //batchEvaluation();
-        testSentence();
+
+        // Uncomment demo() to run the demo on a sample file
+        //demo();
     }
 
-    public static void testSentence() {
+    public static void demo() {
         Properties props = new Properties();
-        String text = "Phonte doing 'THE SONG' @theroxy last sunday       this was shot at about my vantage point.\n" +
+        String sample_file_content = "Phonte doing 'THE SONG' @theroxy last sunday       this was shot at about my vantage point.\n" +
                 "@janiro what do u play to keep it extra crunk after Swag Surfin and THE SONG.\n" +
                 "ROFFLE @phontigalo doin' the neo soul version of \"THE SONG\" and \"Make the Trap Say Aye\"  Bout to start singin' all ignorant music now.\n" +
                 "I think @TimmyDS has some kind of hookup at 102 9FM  Because there is no way the songs THE SONG & Halle Berry can be this popular.\n" +
@@ -145,7 +149,7 @@ public class SentimentAnalyst {
         props.setProperty("annotators","tokenize, ssplit, pos, lemma, parse, sentiment");
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
-        Annotation annotation = pipeline.process(text);
+        Annotation annotation = pipeline.process(sample_file_content);
         List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
         for (CoreMap sentence : sentences) {
             String sentiment = sentence.get(SentimentCoreAnnotations.SentimentClass.class);

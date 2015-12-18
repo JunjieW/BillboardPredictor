@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 /**
  * Created by JunjieW on 2015/11/28.
  *
- * INPUT: datasets, songlist
+ * INPUT: datasets, list of songs
  * OUTPUT: tweets grouped by keywords on weekly basis
  *
  * 1. split data files on weekly basis
