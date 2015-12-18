@@ -3,8 +3,10 @@ __author__ = 'JunjieW'
 import urllib
 import re
 import HTMLParser
+import os
 from datetime import datetime
 from datetime import timedelta
+
 
 # We need to write a input including the specific urls during
 # a certina period, then iterate to get the html
@@ -125,11 +127,17 @@ def getBillboardData(str_start, num_weeks, onlyTitle):
         str_url = str_url_prefix + my_datetime.strftime("%Y%m%d")
         print my_datetime.strftime("%Y%m%d")
         print str_url
-        bbt_parser = BoardTableParser(str(my_datetime.strftime("%Y%m%d")), onlyTitle)
+        str_dataFolder = "./"
+        if onlyTitle:
+            str_dataFolder = "./data_simple/"
+        else:
+            str_dataFolder = "./data_full/"
+        if not os.path.exists(str_dataFolder):
+            os.makedirs(str_dataFolder)
+
+        bbt_parser = BoardTableParser(str_dataFolder + str(my_datetime.strftime("%Y%m%d")), onlyTitle)
         bbt_parser.feed(gethtml(str_url))
         my_datetime += timedelta(days=7)
 
-
-getBillboardData('20090606', 31, True)
-
-# # TODO: wirte data into text file rather than in console
+if __name__ == "__main__":
+    getBillboardData('20090606', 31, True)
