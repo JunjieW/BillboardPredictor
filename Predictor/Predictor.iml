@@ -8,5 +8,6 @@
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="stanford-corenlp-full-2015-12-09" level="project" />
+    <orderEntry type="library" name="weka-3-7-13" level="project" />
   </component>
 </module>
