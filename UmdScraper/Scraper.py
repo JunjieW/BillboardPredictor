@@ -3,30 +3,17 @@ __author__ = 'JunjieW'
 import urllib
 import re
 import HTMLParser
+import os
 from datetime import datetime
 from datetime import timedelta
+
 
 # We need to write a input including the specific urls during
 # a certina period, then iterate to get the html
 
 ## The 8-digits date argument in url means the week of a certain chart,
 ## according to billboard, the date of a chart is the last day of the chart.
-## So if we search for 2009 06 06, it means the char is for 2009 05 31 - 2009 06 06
-
-# str_url_prefix = 'http://www.umdmusic.com/default.asp?Lang=English&Chart=D&ChDate='
-# str_init_date = '20090530'
-# number_of_weeks = 20
-# str_url = str_url_prefix + str_init_date
-# print str_url + '\n'
-
-# my_datetime = datetime.strptime(str_init_date, "%Y%m%d")
-# print 'Confirm Intialization: ', my_datetime.strftime("%Y%m%d") + '\n'
-
-# print '==== Start ====='
-# my_datetime = datetime.strptime(str_init_date, "%Y%m%d")
-# for i in range(1,number_of_weeks+1):
-#     print my_datetime.strftime("%Y%m%d")
-#     my_datetime += timedelta(days=7)
+## So if we search for 2009 06 06, it means the chart is for 2009 05 31 - 2009 06 06
 
 class BoardTableParser(HTMLParser.HTMLParser):
     def __init__(self, str_outfile, bool_only_get_title):
@@ -93,7 +80,8 @@ class BoardTableParser(HTMLParser.HTMLParser):
             self.in_tr = False
         if tag ==  'html':
             self.outfile.write('# Week ' + self.str_outfile_path_indicated_by_date + '\n')
-            self.outfile.write("This Week Pos, Last Week Pos, This Week Peak, This Week Total Week, Title, Artist, Entry Date, Entry Pos, Peak Pos, Total Weeks\n")
+            if not self.is_only_get_title:
+                self.outfile.write("This Week Pos, Last Week Pos, This Week Peak, This Week Total Week, Title, Artist, Entry Date, Entry Pos, Peak Pos, Total Weeks\n")
             self.outfile.write(self.out_buffer)
 
     def putIntoBuffer(self, str_data):
@@ -125,26 +113,31 @@ def gethtml(str_url):
     return f_html
 
 
-def getBillboardData(str_start, num_weeks):
+def getBillboardData(str_start, num_weeks, onlyTitle):
     # Initial url, intitial data, and iterations setting
     str_url_prefix = 'http://www.umdmusic.com/default.asp?Lang=English&Chart=D&ChDate='
     str_init_date = str_start
     number_of_weeks = num_weeks
     my_datetime = datetime.strptime(str_init_date, "%Y%m%d")
 
-    only_get_song_title = True
+    #only_get_song_title = onlyTitle
 
     # Start iteration
     for i in range(1,number_of_weeks+1):
         str_url = str_url_prefix + my_datetime.strftime("%Y%m%d")
         print my_datetime.strftime("%Y%m%d")
         print str_url
-        bbt_parser = BoardTableParser(str(my_datetime.strftime("%Y%m%d")), only_get_song_title)
+        str_dataFolder = "./"
+        if onlyTitle:
+            str_dataFolder = "./data_simple/"
+        else:
+            str_dataFolder = "./data_full/"
+        if not os.path.exists(str_dataFolder):
+            os.makedirs(str_dataFolder)
+
+        bbt_parser = BoardTableParser(str_dataFolder + str(my_datetime.strftime("%Y%m%d")), onlyTitle)
         bbt_parser.feed(gethtml(str_url))
         my_datetime += timedelta(days=7)
 
-
-getBillboardData('20090530', 5)
-
-
-# # TODO: wirte data into text file rather than in console
+if __name__ == "__main__":
+    getBillboardData('20090606', 31, True)
